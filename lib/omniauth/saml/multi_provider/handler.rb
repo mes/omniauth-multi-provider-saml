@@ -20,12 +20,14 @@ module OmniAuth
           @saml_path_regex = /^#{@provider_path_prefix}\/(?<identity_provider_id>#{@identity_provider_id_regex})/
           @request_path_regex = /#{saml_path_regex}\/?$/
           @callback_path_regex = /#{saml_path_regex}\/callback\/?$/
+          @metadata_path_regex = /#{saml_path_regex}\/metadata\/?$/
         end
 
         def provider_options
           {
               request_path: method(:request_path?),
               callback_path: method(:callback_path?),
+              metadata_path: method(:metadata_path?),
               setup: method(:setup)
           }
         end
@@ -33,7 +35,7 @@ module OmniAuth
         private
 
         attr_reader :provider_path_prefix, :saml_path_regex, :request_path_regex, :callback_path_regex,
-                    :identity_provider_options_generator
+                    :metadata_path_regex, :identity_provider_options_generator
 
         def setup(env)
           identity_provider_id = extract_identity_provider_id(env)
@@ -67,6 +69,11 @@ module OmniAuth
         def callback_path?(env)
           path = current_path(env)
           !!callback_path_regex.match(path)
+        end
+
+        def metadata_path?(env)
+          path = current_path(env)
+          !!metadata_path_regex.match(path)
         end
 
         def current_path(env)
